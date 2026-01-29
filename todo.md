@@ -28,10 +28,10 @@
 
 ## 📦 Phase 2: Data Models (Very Important)
 
-- [ ] Define an **Event** structure
-- [ ] Define a **Booking** structure
-- [ ] Decide what fields each will have
-- [ ] Create an in-memory list for:
+- [x] Define an **Event** structure
+- [x] Define a **Booking** structure
+- [x] Decide what fields each will have
+- [x] Create an in-memory list for:
 
   - events
   - bookings
@@ -42,15 +42,15 @@
 
 ## 🧪 Phase 3: Seed Sample Data
 
-- [ ] Create 2–3 sample events
-- [ ] Assign:
+- [x] Create 2–3 sample events
+- [x] Assign:
 
   - IDs
   - names
   - dates
   - ticket counts
 
-- [ ] Print all events once to verify data
+- [x] Print all events once to verify data
 
 ✔ Goal: _“My data looks correct when printed.”_
 
