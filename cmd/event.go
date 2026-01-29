@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var menuCmd = &cobra.Command{
+var geteventsCmd = &cobra.Command{
 	Use:   "menu",
 	Short: "Menu Command",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -20,5 +20,5 @@ var menuCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(menuCmd)
+	rootCmd.AddCommand(geteventsCmd)
 }

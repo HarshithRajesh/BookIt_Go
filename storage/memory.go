@@ -7,24 +7,15 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/HarshithRajesh/BookIt_Go/db"
 	"github.com/HarshithRajesh/BookIt_Go/models"
+	"gorm.io/gorm"
 )
-
-var events = []models.Event{
-	{ID: 1, EventName: "Golang conference", Date: "20 Feb 2026", TotalTickets: 100, RemainingTickets: 100},
-	{ID: 2, EventName: "Toxic Movie", Date: "15 March 2026", TotalTickets: 100, RemainingTickets: 100},
-	{ID: 3, EventName: "Junior Level Hackathon", Date: "25 April 2026", TotalTickets: 100, RemainingTickets: 100},
-	{ID: 4, EventName: "KubCon", Date: "10 May 2026", TotalTickets: 100, RemainingTickets: 100},
-	{ID: 5, EventName: "Golang International conference", Date: "20 May 2026", TotalTickets: 100, RemainingTickets: 100},
-}
-
-var booking = []models.Booking{}
 
 func GetEvents() []string {
 	var names []string
-	for _, event := range events {
-		names = append(names, event.EventName)
-	}
+	db.DB.Model(&models.Event{}).Pluck("event_name", &names)
+
 	return names
 }
 
@@ -37,24 +28,24 @@ func CheckEventTickets(eventID1 string, BookedTickets1 string) error {
 	if err != nil {
 		log.Fatal("Couldnt convert BookedTickets to int")
 	}
-	for _, event := range events {
-		if event.ID == eventID {
-			if event.RemainingTickets > BookedTickets {
-				return nil
-			} else if event.RemainingTickets > 0 {
-				fmt.Println("RemainingTickets is ", event.RemainingTickets)
-				return errors.New("remainingTickets is less then booking ticketsg")
 
-			} else {
-				return errors.New("remainingTickets is 0")
-			}
+	var event models.Event
+	res := db.DB.First(&event, eventID)
+	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return errors.New("event not found in the database")
 		}
 	}
-
-	return errors.New("event not found")
+	if event.RemainingTickets >= BookedTickets {
+		return nil
+	} else if event.RemainingTickets > 0 {
+		return fmt.Errorf("only %d tickets remaining, cannot book %d", event.RemainingTickets, BookedTickets)
+	} else {
+		return errors.New("this event is fully booked (0 tickets remaining)")
+	}
 }
 
-func CreateBooking(eventID1 string, BookedTickets1 string, customerName string, customerPhone string) {
+func CreateBooking(eventID1 string, BookedTickets1 string, customerName string, customerPhone string) error {
 	eventID, err := strconv.Atoi(eventID1)
 	if err != nil {
 		log.Fatal("Couldnt convert Event id to int")
@@ -64,12 +55,23 @@ func CreateBooking(eventID1 string, BookedTickets1 string, customerName string, 
 		log.Fatal("Couldnt convert BookedTickets to int")
 	}
 	newBooking := models.Booking{
-		ID:            len(booking) + 1,
 		CustomerName:  customerName,
 		CustomerPhone: customerPhone,
 		EventID:       eventID,
 		BookedTickets: BookedTickets,
 	}
-	booking = append(booking, newBooking)
-	fmt.Println("Booking Successful")
+	result := db.DB.Create(&newBooking)
+	if result.Error != nil {
+		return fmt.Errorf("failed to save booking: %w", result.Error)
+	}
+	err = db.DB.Model(&models.Event{}).
+		Where("id = ?", eventID).
+		Update("remaining_tickets", gorm.Expr("remaining_tickets - ?", BookedTickets)).
+		Error
+	if err != nil {
+		return fmt.Errorf("booking saved, but failed to update event capacity: %w", err)
+	}
+
+	fmt.Println("Booking Successful!")
+	return nil
 }
