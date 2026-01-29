@@ -1,4 +1,4 @@
-// Package Cmd is used for cli booking tickets
+// Package cmd is used for cli booking tickets
 package cmd
 
 import (
@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/HarshithRajesh/BookIt_Go/storage"
-
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +13,7 @@ var bookingCmd = &cobra.Command{
 	Use:   "booking",
 	Short: "Booking Tickets",
 	Long:  "Book the event tickets",
+	Args:  cobra.ExactArgs(4),
 	Run: func(cmd *cobra.Command, args []string) {
 		eventID := args[0]
 		customerName := args[1]
@@ -25,7 +25,10 @@ var bookingCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		fmt.Println(eventID, customerName, customerPhone, BookedTickets)
-		storage.CreateBooking(eventID, BookedTickets, customerName, customerPhone)
+		err = storage.CreateBooking(eventID, BookedTickets, customerName, customerPhone)
+		if err != nil {
+			log.Println("Booking Failed")
+		}
 	},
 }
 

@@ -8,7 +8,10 @@ import (
 
 func main() {
 	db.ConnectDB()
-	db.DB.AutoMigrate(&models.Event{}, &models.Booking{})
+	err := db.DB.AutoMigrate(&models.Event{}, &models.Booking{})
+	if err != nil {
+		panic("couldnt migrate")
+	}
 	db.SeedEvents()
 
 	cmd.Execute()

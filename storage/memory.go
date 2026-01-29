@@ -75,3 +75,18 @@ func CreateBooking(eventID1 string, BookedTickets1 string, customerName string, 
 	fmt.Println("Booking Successful!")
 	return nil
 }
+
+func GetBookingInfo(bookingID int) (models.Booking, error) {
+	var booking models.Booking
+
+	result := db.DB.First(&booking, bookingID)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return booking, errors.New("booking not found")
+		}
+		return booking, result.Error
+	}
+
+	return booking, nil
+}
